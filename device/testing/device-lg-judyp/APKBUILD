@@ -1,0 +1,26 @@
+# Reference: <https://postmarketos.org/devicepkg>
+# Maintainer: Jenneron <jenneron@protonmail.com>
+pkgname=device-lg-judyp
+pkgdesc="LG V35 ThinQ"
+pkgver=4
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="linux-postmarketos-qcom-sdm845 mkbootimg postmarketos-base soc-qcom-sdm845"
+makedepends="devicepkg-dev"
+source="deviceinfo modules-initfs"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+63398752663d760067869268552aafca737af8106e9b8c67e24f9f3f218f2be2a75ccbd745eed0304711e06689de2f69ecbe5d8ba423d6fb845f4030be3a1e8e  deviceinfo
+09fb39b4698e3fd433e35f94b4c39787a4ff9af258e8a85b5a197fb2676f993da2666ffb4ae98c41f35446d52b3578e1e6ebd06cc7010287ca140bf207c3a8af  modules-initfs
+"

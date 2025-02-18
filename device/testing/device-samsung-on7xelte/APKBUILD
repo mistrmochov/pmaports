@@ -1,0 +1,37 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-on7xelte
+pkgdesc="Samsung Galaxy J7 Prime"
+pkgver=3
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="
+	dtbtool-exynos
+	linux-postmarketos-exynos7870
+	mesa-dri-simpledrm
+	mkbootimg
+	postmarketos-base
+"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="Proprietary firmware blobs for $pkgdesc"
+	depends="firmware-samsung-on7xelte"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+0f8d5e47b997d996b81ed19452c044403b4a34d6dff78a145a4beabbff4830d0279850d52f6f5280f8d14f429104f3ded9d94e50eaf98536d3896a235b653039  deviceinfo
+"

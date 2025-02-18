@@ -1,0 +1,73 @@
+# Maintainer: Newbyte <newbyte@disroot.org>
+# Kernel config based on: arch/arm/configs/u8500_defconfig
+
+_flavor="postmarketos-stericsson"
+_config="config-$_flavor.armv7"
+pkgname=linux-$_flavor
+pkgver=6.10.8
+pkgrel=2
+pkgdesc="Mainline kernel for ST-Ericsson NovaThor devices"
+arch="armv7"
+_carch="arm"
+url="https://kernel.org"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps
+	pmb:cross-native
+	pmb:kconfigcheck-waydroid
+	pmb:kconfigcheck-containers
+	pmb:kconfigcheck-zram
+	pmb:kconfigcheck-nftables
+	"
+makedepends="
+	bash
+	bison
+	findutils
+	gmp-dev
+	flex
+	mpc1-dev
+	mpfr-dev
+	openssl-dev
+	perl
+	postmarketos-installkernel
+"
+case $pkgver in
+	*.*.*)	_kernver=${pkgver%.0};;
+	*.*)	_kernver=$pkgver;;
+esac
+source="
+	https://cdn.kernel.org/pub/linux/kernel/v${_kernver%%.*}.x/linux-$_kernver.tar.xz
+	config-$_flavor.armv7
+
+	make-new-commands-optional.patch
+	"
+builddir="$srcdir/linux-${_kernver//_/-}"
+
+prepare() {
+	default_prepare
+	cp "$srcdir/config-$_flavor.$CARCH" .config
+}
+
+build() {
+	unset LDFLAGS
+	make ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION=$((pkgrel + 1 ))
+}
+
+package() {
+	mkdir -p "$pkgdir"/boot
+	make zinstall modules_install dtbs_install \
+		ARCH="$_carch" \
+		INSTALL_PATH="$pkgdir"/boot \
+		INSTALL_MOD_PATH="$pkgdir" \
+		INSTALL_DTBS_PATH="$pkgdir"/boot/dtbs
+	rm -f "$pkgdir"/lib/modules/*/build "$pkgdir"/lib/modules/*/source
+
+	install -D "$builddir"/include/config/kernel.release \
+		"$pkgdir"/usr/share/kernel/$_flavor/kernel.release
+}
+
+sha512sums="
+0829f6963a91cd230e33fa82605ff0b5b1b7c6f21192634f94a60185926c9b2eb12f3124693753c7da33cb6b15abe9146ec343c9bf7307156dd63c2fbc585f13  linux-6.10.8.tar.xz
+aaba9361986b8a798d8797b000b4175c46dbd5348f4df8f9deaa07af911482c89374db44683eb78571f649c34e19f80864a3c313c7ec6ff02cc4317db11c8517  config-postmarketos-stericsson.armv7
+9e474877e43f26b389c63436fdad2009fb80afd753fffe88104d8cfab67d97c65d8af08420d1739301461db3b03af3bb9fb5c40a691a675e9ab551fdd35724aa  make-new-commands-optional.patch
+"

@@ -1,0 +1,42 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-oneplus-lemonadep
+pkgdesc="OnePlus 9 Pro"
+pkgver=2
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="
+	linux-postmarketos-qcom-sm8350
+	mkbootimg
+	postmarketos-base
+	soc-qcom-sm8350
+	bootmac
+"
+makedepends="
+	devicepkg-dev
+"
+source="
+	deviceinfo
+"
+
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="Modem, WiFi, and GPU Firmware"
+	depends="firmware-oneplus-lemonade"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+d98a66b0c3de6dfc791e731c5ef139596a8585eda6c62ae07ed72ba0df3d87cbf1200f6e7e2c63034b569fde6dbef0d66c200aa83b6baffdd462eb91c5bbb2fa  deviceinfo
+"

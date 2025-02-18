@@ -1,0 +1,111 @@
+pkgname=firmware-nothing-spacewar
+pkgver=20250103
+pkgrel=1
+pkgdesc="Firmware for Nothing Phone (1)"
+subpackages="
+	$pkgname-adreno
+	$pkgname-adsp
+	$pkgname-cdsp
+	$pkgname-hexagonfs
+	$pkgname-ipa
+	$pkgname-modem
+	$pkgname-vpu
+	$pkgname-wpss
+	"
+url="https://github.com/mainlining/firmware-nothing-spacewar"
+arch="aarch64"
+license="proprietary"
+makedepends="pil-squasher"
+options="!check !strip !archcheck !tracedeps pmb:cross-native"
+_commit="88c0ece37f3dc72576acfa816f0bb0f72c392cb4"
+source="$pkgname-$_commit.tar.gz::$url/archive/$_commit/$pkgname-$_commit.tar.gz"
+builddir="$srcdir/$pkgname-$_commit"
+resultdir="lib/firmware/qcom/sm7325/nothing/spacewar"
+
+build() {
+	for i in firmware/*.mdt; do
+		pil-squasher "firmware/$(basename "$i" .mdt)".mbn "$i"
+	done
+}
+
+package() {
+	# parent package is empty
+	mkdir -p "$pkgdir"
+}
+
+adreno() {
+	pkgdesc="Nothing Phone (1) Adreno firmware"
+
+	install -Dm644 "$builddir"/firmware/a660_zap.mbn -t \
+		"$subpkgdir/$resultdir/"
+}
+
+adsp() {
+	pkgdesc="Nothing Phone (1) ADSP firmware"
+
+	install -Dm644 "$builddir"/firmware/adsp.mbn -t \
+		"$subpkgdir/$resultdir/"
+	install -Dm644 "$builddir"/firmware/adsp*.jsn -t \
+		"$subpkgdir/$resultdir/"
+	install -Dm644 "$builddir"/firmware/battmgr.jsn -t \
+		"$subpkgdir/$resultdir/"
+}
+
+cdsp() {
+	pkgdesc="Nothing Phone (1) CDSP firmware"
+
+	install -Dm644 "$builddir"/firmware/cdsp.mbn -t \
+		"$subpkgdir/$resultdir/"
+	install -Dm644 "$builddir"/firmware/cdsp*.jsn -t \
+		"$subpkgdir/$resultdir/"
+}
+
+hexagonfs() {
+	pkgdesc="Nothing Phone (1) HexagonFS files"
+
+	mkdir -p "$subpkgdir/usr/share"
+
+	cp -r "$builddir/hexagonfs" \
+		"$subpkgdir/usr/share/qcom"
+	find "$subpkgdir/usr/share/qcom/" \
+		-type f -exec chmod 0644 {} \;
+}
+
+ipa() {
+	pkgdesc="Nothing Phone (1) IPA firmware"
+
+	install -Dm644 "$builddir"/firmware/yupik_ipa_fws.mbn \
+		"$subpkgdir/$resultdir/ipa_fws.mbn"
+}
+
+modem() {
+	pkgdesc="Nothing Phone (1) Modem firmware"
+
+	install -Dm644 "$builddir"/firmware/modem.mbn -t \
+		"$subpkgdir/$resultdir/"
+	install -Dm644 "$builddir"/firmware/modem*.jsn -t \
+		"$subpkgdir/$resultdir/"
+
+	cp -r "$builddir"/firmware/modem_pr/ \
+		"$subpkgdir/$resultdir/"
+	find "$subpkgdir/$resultdir/" \
+		-type f -exec chmod 0644 {} \;
+}
+
+vpu() {
+	pkgdesc="Nothing Phone (1) VPU firmware"
+
+	install -Dm644 "$builddir"/firmware/vpu20_1v.mbn -t \
+		"$subpkgdir/$resultdir/"
+}
+
+wpss() {
+	pkgdesc="Nothing Phone (1) WPSS firmware"
+
+	install -Dm644 "$builddir"/firmware/wpss.mbn -t \
+		"$subpkgdir/$resultdir/"
+}
+
+sha512sums="
+9c07913289e8637c01102d7b9fb11ab567c302cc142f91b0f933e290c75c9d960cf59629d2c293128858e6a27de06883af148facbb3f7ababd1b82117d1b2107  firmware-nothing-spacewar-88c0ece37f3dc72576acfa816f0bb0f72c392cb4.tar.gz
+"

@@ -1,0 +1,71 @@
+# Maintainer: Audun MG <audun@gangsto.org>
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-sony-leo
+pkgdesc="Sony Xperia Z3"
+pkgver=3
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="
+	lk2nd-msm8974
+	mkbootimg
+	msm-fb-refresher
+	postmarketos-base
+	soc-qcom-msm8974
+"
+makedepends="devicepkg-dev"
+subpackages="
+	$pkgname-kernel-mainline:kernel_mainline
+	$pkgname-kernel-downstream:kernel_downstream
+	$pkgname-nonfree-firmware:nonfree_firmware
+	$pkgname-nonfree-firmware-openrc:nonfree_firmware_openrc
+	"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+kernel_downstream() {
+	pkgdesc="Weston and X.Org with touch and wifi works (see device table for details)"
+	depends="linux-sony-leo"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+kernel_mainline() {
+	pkgdesc="Kernel close to mainline"
+	depends="linux-postmarketos-qcom-msm8974"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="Wifi/GPU firmware"
+	depends="
+		firmware-sony-leo-adsp
+		firmware-sony-leo-modem
+		firmware-sony-leo-wifi
+		msm-modem
+		ta-service
+		"
+	mkdir "$subpkgdir"
+}
+
+nonfree_firmware_openrc() {
+	install_if="$pkgname-nonfree-firmware=$pkgver-r$pkgrel openrc"
+	install="$subpkgname.post-install $subpkgname.post-upgrade"
+	depends="
+		ta-service-openrc
+		"
+
+	mkdir -p "$subpkgdir"
+}
+
+sha512sums="
+fd34804dd7e5e7228085d37e78bba0cc0dbcd7842b6ebffedbb6ae1a955652e3cfdb08665324df0b3d3650f28f3980d90981ece80d00258e53805db6ea36af11  deviceinfo
+"

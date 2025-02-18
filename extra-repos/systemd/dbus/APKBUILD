@@ -1,0 +1,101 @@
+# Forked from Alpine to enable systemd
+
+pkgname=dbus
+pkgver=9991.16.0
+_pkgver=1.16.0
+pkgrel=1
+pkgdesc="Freedesktop.org message bus system"
+url="https://www.freedesktop.org/Software/dbus"
+arch="all"
+license="AFL-2.1 OR GPL-2.0-or-later"
+depends_dev="util-linux-dev"
+pkggroups="messagebus"
+provider_priority=1
+install="$pkgname.pre-install"
+triggers="$pkgname.trigger=/usr/share/dbus-1/system.d"
+options="!check" # Borked in pmbootstrap...
+makedepends="
+	$depends_dev
+	expat-dev
+	glib-dev
+	libsm-dev
+	libx11-dev
+	meson
+	xmlto
+	libcap-getcap
+	"
+subpackages="
+	$pkgname-daemon-launch-helper:launchhelper
+	$pkgname-dev
+	$pkgname-doc
+	$pkgname-libs
+	$pkgname-x11
+	"
+if [ -z "$BOOTSTRAP" ] || [ "$BOOTSTRAP" -gt 3 ]; then
+	makedepends="$makedepends systemd-dev"
+	subpackages="$subpackages $pkgname-systemd"
+fi
+source="https://dbus.freedesktop.org/releases/dbus/dbus-$_pkgver.tar.xz"
+builddir="$srcdir/dbus-$_pkgver"
+
+# secfixes:
+#   1.14.4-r0:
+#     - CVE-2022-42010
+#     - CVE-2022-42011
+#     - CVE-2022-42012
+#   1.12.18-r0:
+#     - CVE-2020-12049
+#   1.12.16-r0:
+#     - CVE-2019-12749
+
+build() {
+	abuild-meson \
+		-Dsystem_pid_file=/run/dbus/dbus.pid \
+		output .
+	meson compile -C output
+}
+
+check() {
+	meson test --no-rebuild --print-errorlogs -C output
+}
+
+package() {
+	depends="$pkgname-libs=$pkgver-r$pkgrel"
+
+	DESTDIR="$pkgdir" meson install --no-rebuild -C output
+
+	# can't install tmpfs
+	rm -r "$pkgdir"/run
+}
+
+libs() {
+	pkgdesc="D-BUS access libraries"
+	depends="systemd-libs"
+
+	amove usr/lib/lib*.so.*
+}
+
+x11() {
+	pkgdesc="X11 add-ons for D-BUS"
+	depends="$pkgname=$pkgver-r$pkgrel"
+
+	amove usr/bin/dbus-launch
+}
+
+launchhelper() {
+	pkgdesc="DBus SUID launch helper for autospawning"
+	install_if="$pkgname=$pkgver-r$pkgrel"
+
+	amove usr/libexec/dbus-daemon-launch-helper
+
+	chmod 4750 "$subpkgdir"/usr/libexec/dbus-daemon-launch-helper
+	chown root:messagebus "$subpkgdir"/usr/libexec/dbus-daemon-launch-helper
+}
+
+dev() {
+	default_dev
+}
+
+sha512sums="
+9206bf4e41575f379e4c615212d137600967311f3c8feac94692aadf4dca9df9169ae52c404ec8ed31a9b2bc718792be920ac0130f1159f082e4b6c66f3f233e  dbus-1.16.0.tar.xz
+"

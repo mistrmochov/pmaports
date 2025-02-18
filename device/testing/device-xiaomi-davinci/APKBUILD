@@ -1,0 +1,55 @@
+# Maintainer: Jens Reidel <adrian@travitia.xyz>
+# Reference: <https://postmarketos.org/devicepkg>
+
+pkgname=device-xiaomi-davinci
+pkgdesc="Xiaomi Mi 9T / Redmi K20"
+pkgver=3
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="
+	linux-postmarketos-qcom-sm7150
+	make-dynpart-mappings
+	mkbootimg
+	postmarketos-base
+	soc-qcom-sm7150
+	soc-qcom-sm7150-unl0kr-quirk
+"
+makedepends="devicepkg-dev"
+source="
+	deviceinfo
+	modules-initfs
+"
+
+subpackages="
+	$pkgname-nonfree-firmware:nonfree_firmware
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="Firmware for GPU, Audio, Modem, WiFi, etc."
+	depends="
+		firmware-xiaomi-davinci-adsp
+		firmware-xiaomi-davinci-cdsp
+		firmware-xiaomi-davinci-ipa
+		firmware-xiaomi-davinci-modem
+		firmware-xiaomi-davinci-venus
+		firmware-xiaomi-davinci-wlan
+		soc-qcom-sm7150-nonfree-firmware
+		"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+2350ec38791799ab0cd0ec12256669e421ad716870956c08885b14dac5bfd05b170314175671cb35bdb9f58a5737e35824be0007ccf0a1f7f671d033d1c948ee  deviceinfo
+474485963fb4ff97982894be2e024de09e6b3e7b324aceebde0480200998cfa92d68415752d59802bb63aebf7f2a343415d281938f2e308e5066ba08f3d79606  modules-initfs
+"

@@ -1,0 +1,85 @@
+# Maintainer: Caleb Connolly <caleb@postmarketos.org>
+# Co-Maintainer: Ferass El Hafidi <funderscore@postmarketos.org>
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-postmarketos-trailblazer
+pkgdesc="postmarketOS Trailblazer generic ARM64"
+pkgver=12
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="
+	postmarketos-base
+	soc-qcom-sdm845-qbootctl
+	linux-firmware-qcom
+	linux-firmware-ath10k
+	linux-firmware-ath11k
+	linux-firmware-ath12k
+	linux-firmware-qca
+	linux-firmware-rtw88
+	rmtfs
+	pd-mapper
+	tqftpserv
+	bootmac
+	systemd-boot
+	firmware-siliconlabs-rs9116
+	firmware-brcm43752
+	dtbloader
+	woa-firmware-yoinker
+"
+makedepends="devicepkg-dev"
+subpackages="
+	$pkgname-kernel-next:kernel_next
+	$pkgname-kernel-lts:kernel_lts
+	$pkgname-kernel-edge:kernel_edge
+	$pkgname-kernel-postmarketos-qcom-laptop:kernel_postmarketos_qcom_laptop
+	$pkgname-kernel-postmarketos-amlogic:kernel_postmarketos_amlogic
+"
+source="
+	deviceinfo
+	modules-initfs
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+kernel_next() {
+	pkgdesc="Unstable next kernel (linux-next)"
+	depends="linux-next"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+kernel_lts() {
+	pkgdesc="Long term support (LTS) kernel from Alpine Linux (linux-lts)"
+	depends="linux-lts"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+kernel_edge() {
+	pkgdesc="Mainline kernel from Alpine Linux (linux-edge)"
+	depends="linux-edge"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+kernel_postmarketos_qcom_laptop() {
+	pkgdesc="Mainline kernel with additional patches for Qualcomm Snapdragon-based laptops (linux-postmarketos-qcom-laptop)"
+	depends="linux-postmarketos-qcom-laptop"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+kernel_postmarketos_amlogic() {
+	pkgdesc="Mainline kernel with additional patches for Amlogic AArch64-based devices (linux-postmarketos-amlogic)"
+	depends="linux-postmarketos-amlogic"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+sha512sums="
+12e7c1af63b24a37198a73e77d45cc5cbcb3ce34bbdb32d913cb3e427896ddcf2266269f8fe0c73c15c751a34ad738bd7fc958629ad066cd3c0a9faaaae7d67f  deviceinfo
+7642e07eb1d0d24c8b1d754371394ff5a5b532fb699be5cac75431b58755adb6f550bf4cf8cddde27ef4e7f20ea90a5368298b0e44f9d145f1f6d7a4026a550e  modules-initfs
+"

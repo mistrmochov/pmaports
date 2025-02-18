@@ -1,0 +1,23 @@
+# Maintainer: Richard Acayan <mailingradian@gmail.com>
+pkgname=alsa-ucm-conf-qcom-sdm670
+pkgver=1.2.9_git20241211
+pkgrel=0
+pkgdesc="ALSA UCM configuration for SDM670 devices"
+url="https://gitlab.com/sdm670-mainline/alsa-ucm-conf"
+arch="aarch64"
+license="BSD-3-Clause"
+provides="alsa-ucm-conf"
+provider_priority=1
+_commit="80bbe11220dcb5db4f2b3e65f1e1783d4935f902"
+source="https://gitlab.com/sdm670-mainline/alsa-ucm-conf/-/archive/$_commit/alsa-ucm-conf-$_commit.tar.gz"
+options="!check"
+
+package() {
+	# install audio config files
+	mkdir -p "$pkgdir"/usr/share/alsa/ucm2
+	cp -r "$srcdir/alsa-ucm-conf-$_commit"/ucm2 "$pkgdir"/usr/share/alsa/
+}
+
+sha512sums="
+489c9807e7667e2246426970009d2dbed0267d797764a8766f37375e6bf2d4d0035ab46d205acb9e96748d2257083ae816639cd559b292e2551ab7481a9040f9  alsa-ucm-conf-80bbe11220dcb5db4f2b3e65f1e1783d4935f902.tar.gz
+"

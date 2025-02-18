@@ -1,0 +1,24 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-lt023g
+pkgdesc="Galaxy Tab 3 7.0"
+pkgver=2
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-samsung-lt023g mkbootimg"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+ad66b88e9fc39e30cb205a5d203eac7a20c67b6e1233d52651e0596f8dc2e10b358baba054cd168d9f30e1a0477d738520b7ff04b993b9c9938e2f3f45853339  deviceinfo
+"

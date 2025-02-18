@@ -1,0 +1,90 @@
+# Kernel config based on defconfig and exynos7870.config
+pkgname=linux-postmarketos-exynos7870
+pkgver=6.11.6
+pkgrel=2
+pkgdesc="Close-to-mainline kernel for Samsung Exynos 7870 devices"
+arch="aarch64"
+_carch="arm64"
+_flavor="postmarketos-exynos7870"
+url="https://gitlab.com/exynos7870-mainline/linux"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps pmb:cross-native"
+makedepends="
+	bash
+	bc
+	bison
+	flex
+	openssl-dev
+	perl
+	postmarketos-installkernel
+"
+
+_owner="exynos7870-mainline"
+_repo="mainline-patches"
+_commit="5e7613fc57598f3755592febff2a907e3dbca4fb"
+_config="config-$_flavor.aarch64"
+_kmajver="$(echo "$pkgver" | sed 's/\..*$//')"
+
+# Source
+source="
+	$_config
+	linux-$pkgver.tar.gz::https://cdn.kernel.org/pub/linux/kernel/v$_kmajver.x/linux-$pkgver.tar.gz
+	patches-$_commit.tar.gz::https://gitlab.com/$_owner/$_repo/-/archive/$_commit/$_repo-$_commit.tar.gz
+"
+builddir="$srcdir/linux-$pkgver"
+
+prepare() {
+	default_prepare
+	cp "$srcdir/$_config" .config
+
+	# Apply the patches to the mainline kernel.
+	for patchfile in "$srcdir/$_repo"-*/patches/*; do
+		patch -p1 < "$patchfile"
+	done
+
+	makefile="$builddir/arch/arm64/boot/dts/exynos/Makefile"
+
+	for dts in "$srcdir/$_repo"-*/devicetrees/*dts*; do
+		dtb="$(basename "$dts" | sed 's/\.dts$/.dtb/')"
+
+		# Move the devicetree sources in the kernel tree.
+		cp "$dts" "arch/arm64/boot/dts/exynos/"
+
+		# Mention the devicetree blobs in the Makefile for
+		# compilation if they're absent.
+		if ! grep -q "$dtb" "$makefile"; then
+			echo "dtb-\$(CONFIG_ARCH_EXYNOS) += $dtb" >> "$makefile"
+		fi
+	done
+}
+
+build() {
+	unset LDFLAGS
+	make ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1))-postmarketOS"
+}
+
+package() {
+	mkdir -p "$pkgdir/boot" "$pkgdir/lib/modules"
+
+	# The bootloader does not support zipped kernels
+	make install modules_install dtbs_install \
+		ARCH="$_carch" \
+		INSTALL_PATH="$pkgdir/boot" \
+		INSTALL_MOD_PATH="$pkgdir" \
+		INSTALL_MOD_STRIP=1 \
+		INSTALL_DTBS_PATH="$pkgdir/boot/dtbs"
+	rm -f "$pkgdir"/usr/lib/modules/*/build "$pkgdir"/usr/lib/modules/*/source
+
+	install -D "$builddir/include/config/kernel.release" \
+		"$pkgdir/usr/share/kernel/$_flavor/kernel.release"
+
+	install -Dm644 "$builddir/arch/$_carch/boot/Image" \
+		"$pkgdir/boot/vmlinuz"
+}
+
+sha512sums="
+be6c633918182ee0005f903111b20c3dbf9ce59e30f067b55f5cef362fbd6d8e0e166583d9c940411ad56ee3d51119f3829121ddc170a8f024976a5319f75e29  config-postmarketos-exynos7870.aarch64
+1fa9b602d67f13b0324bb44612f48476d7ae609d627ec4ac9280769f5b410c2e158acc45be9624ac7115fa1b424a27e4a54e07527cbac18b40aeb37880ad80e6  linux-6.11.6.tar.gz
+ff5d524a5fa949d0774bf6b3e6fb4deb882b3c0e4fbe14f15867ae2beafe195a8d27e55540c811d946d7ab5186ddebbdc5a8ee26125e528c0a0a22dbb609c39a  patches-5e7613fc57598f3755592febff2a907e3dbca4fb.tar.gz
+"

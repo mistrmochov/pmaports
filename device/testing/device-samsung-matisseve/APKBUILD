@@ -1,0 +1,32 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-matisseve
+pkgdesc="Samsung Galaxy Tab 4 10.1"
+pkgver=8
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="postmarketos-base mkbootimg linux-postmarketos-qcom-msm8916 soc-qcom-msm8916"
+makedepends="devicepkg-dev"
+source="deviceinfo modules-initfs"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="GPU/WiFi/BT/Modem/Video firmware"
+	depends="firmware-qcom-adreno-a300 msm-firmware-loader firmware-samsung-matisseve-wcnss-nv"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+b1de7e0e22f6c1c72e9c12a0d8afd4651924cbcc234a4ac533eb9dd81737f5447a5991913ab0eea427324ad189a018ff58dc243acf6d07fbdb70ce4e0c1d51c6  deviceinfo
+a04d688a6df0cbb202598b558c5c9d3cf2ad39c8268f3055cc79c56fc7728be4a08366f67fddbb2b689e5bb23bec9a3821860114ea21f60a1d1cd0d6723dd53d  modules-initfs
+"

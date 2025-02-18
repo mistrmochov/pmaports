@@ -1,0 +1,44 @@
+# Reference: <https://postmarketos.org/devicepkg>
+# Maintainer: Jami Kettunen <jami.kettunen@protonmail.com>
+pkgname=device-volla-mimameid
+pkgdesc="Volla Phone 22"
+pkgver=2
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="
+	mkbootimg
+	postmarketos-base
+"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+subpackages="
+	$pkgname-kernel-downstream:kernel_downstream
+	$pkgname-kernel-mainline:kernel_mainline
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+kernel_downstream() {
+	pkgdesc="Downstream kernel"
+	depends="linux-volla-mimameid msm-fb-refresher"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+kernel_mainline() {
+	pkgdesc="Close to mainline kernel, heavily work in progress"
+	depends="linux-postmarketos-mediatek-mt6768"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+sha512sums="
+78f8c0980e9fa4747668b439c75daa490a610517028c28777b421164d87e3f537a37b3545b9f27dbed94856915988ea332cd4eada6bba8127df23c5359af0939  deviceinfo
+"

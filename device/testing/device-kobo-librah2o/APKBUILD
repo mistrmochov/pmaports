@@ -1,0 +1,38 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-kobo-librah2o
+pkgdesc="Kobo Libra H2O"
+pkgver=2
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="
+	kobo-epdc-extractor
+	linux-postmarketos-imx-ereader
+	postmarketos-base
+	u-boot-kobo-librah2o
+	u-boot-tools
+"
+makedepends="devicepkg-dev"
+
+source="
+	deviceinfo
+	uboot-script.cmd
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	mkimage -A arm -O linux -T script -n postmarketOS \
+		-d "$srcdir/uboot-script.cmd" "$srcdir/boot.scr"
+	install -Dm644 "$srcdir/boot.scr" "$pkgdir/boot/boot.scr"
+}
+
+sha512sums="
+c4a5ad43cbc8879b261ed995b7468315bb0984006de5824c778ecd93180a07def0aa27588478021af0b3eb306699530a689b7f0d221380d389d66dcda540533c  deviceinfo
+778674f41c19c56ed8677f151175d22da53e94e03c48d900036287b17a37ba9816976138ad317ec220d807a6ff97ca1006c6ae73c39801929f23927e665f35df  uboot-script.cmd
+"

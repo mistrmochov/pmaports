@@ -1,0 +1,49 @@
+maintainer="Bart Ribbers <bribbers@disroot.org>"
+pkgname=kjournald
+pkgver=24.12.1
+pkgrel=0
+pkgdesc="Framework for interacting with systemd-journald"
+# armhf blocked by qt6-qtdeclarative
+arch="all !armhf"
+url="https://invent.kde.org/system/kjournald"
+license="BSD-3-Clause AND LGPL-2.1-or-later AND MIT"
+depends_dev="
+	kcoreaddons-dev
+	ki18n-dev
+	qt6-qtbase-dev
+	qt6-qtdeclarative-dev
+	systemd-dev
+	"
+makedepends="$depends_dev
+	extra-cmake-modules
+	samurai
+	"
+checkdepends="xvfb-run"
+subpackages="$pkgname-dev $pkgname-lang"
+
+case "$pkgver" in
+	*.90*) _rel=unstable;;
+	*) _rel=stable;;
+esac
+_repo_url="https://invent.kde.org/system/kjournald.git"
+source="https://download.kde.org/$_rel/release-service/$pkgver/src/kjournald-$pkgver.tar.xz"
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib
+	cmake --build build
+}
+
+check() {
+	ctest --test-dir build -E "test_(viewmodel|filtercriteriamodel|remotejournal)"
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+11e5e9e15038c79c677d942d0e6f98d870e2e7feb5cf7154dcea2a759af68a194cc13a606778c949ae88820f3d4d3d3384746fcac9b974712f3c2e1486466efc  kjournald-24.12.1.tar.xz
+"

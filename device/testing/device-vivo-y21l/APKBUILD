@@ -1,0 +1,32 @@
+# Reference: <https://postmarketos.org/devicepkg>
+# Maintainer Raihan Ahamed <raihan1999ahamed@gmail.com>
+pkgname=device-vivo-y21l
+pkgdesc="Vivo Y21L"
+pkgver=3
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="postmarketos-base mkbootimg linux-postmarketos-qcom-msm8916 soc-qcom-msm8916"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="GPU/WiFi/BT/Modem/Video firmware"
+	depends="firmware-qcom-adreno-a300 msm-firmware-loader"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+c3c4fef9d974af48fe2c3b51f76a6093b7f959075366b4a7da20419388c851d01469c156a1d6410012a2727ef47da718d22efcef1cc919ddaa2ae20d68fb3f2f  deviceinfo
+"

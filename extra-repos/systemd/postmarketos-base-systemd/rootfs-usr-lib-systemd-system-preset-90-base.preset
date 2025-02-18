@@ -1,0 +1,82 @@
+# overrides for systemd
+disable systemd-network*
+disable systemd-homed*
+disable systemd-resolved*
+disable systemd-journald-audit.socket
+
+# starting multipathd on systems with no multipath hardware can soft-hang
+# boot, so disable it by default
+disable multipathd.service
+
+# for basically all Uis
+## system services
+enable ModemManager.service
+enable NetworkManager.service
+enable apk-polkit-server.service
+enable bluetooth.service
+enable haveged.service
+enable hkdm.service
+enable kill-pbsplash.service
+enable nftables.service
+enable postmarketos-tweakd.service
+enable rtkit-daemon.service
+enable sleep-inhibitor.service
+enable sshd.service
+enable systemd-rfkill.service
+enable tinydm.service
+enable udisks2.service
+
+# Note: technically these two shouldn't be enabled at the same time, but
+# pmos-base-wifi provides should make sure that only one is installed at the
+# same time.
+enable iwd.service
+enable wpa_supplicant.service
+
+# UIs:
+## plasma
+enable hfd-service.service
+enable urfkill.service
+
+enable plasma-mobile.service
+enable sddm.service
+
+## phosh
+enable phosh.service
+
+## gnome
+enable gdm.service
+
+## fbkeyboard
+enable fbkeyboard.service
+
+# Waydroid
+enable sensorfwd.service
+enable waydroid-container.service
+enable waydroid-sensors.service
+
+# Device specifics:
+# TODO: i like the idea of device/soc specific presets, we should move this out of here
+enable adsp-audio.service
+enable bootmac-bluetooth.service
+enable gesture.service
+enable gnss-share
+enable swclock-offset-boot.service
+enable swclock-offset-shutdown.service
+enable msm-firmware-loader.service
+enable msm-firmware-loader-unpack.service
+
+## sensors
+enable hexagonrpcd-sdsp.service
+enable iio-sensor-proxy.service
+
+## qcom
+enable pd-mapper.service
+enable tqftpserv.service
+enable qbootctl.service
+enable q6voiced.service
+enable rmtfs.service
+enable qrtr-ns.service
+enable diag-router.service
+
+## pinephone{,-pro}
+enable eg25-manager.service

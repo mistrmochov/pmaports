@@ -1,0 +1,105 @@
+pkgname=firmware-nothing-pong
+pkgver=20250103
+pkgrel=1
+pkgdesc="Firmware for Nothing Phone (2)"
+subpackages="
+	$pkgname-adreno
+	$pkgname-adsp
+	$pkgname-cdsp
+	$pkgname-slpi
+	$pkgname-ipa
+	$pkgname-modem
+	$pkgname-venus
+	"
+url="https://github.com/mainlining/firmware-nothing-pong"
+arch="aarch64"
+license="proprietary"
+makedepends="pil-squasher"
+options="!check !strip !archcheck !tracedeps pmb:cross-native"
+_commit="34cd7f468c38c83aadb65a955b3ca98ba596b94a"
+source="$pkgname-$_commit.tar.gz::$url/archive/$_commit/$pkgname-$_commit.tar.gz"
+builddir="$srcdir/$pkgname-$_commit"
+resultdir="lib/firmware/qcom/sm8475/nothing/pong"
+
+build() {
+	for i in *.mdt; do
+		pil-squasher "$(basename "$i" .mdt)".mbn "$i"
+	done
+}
+
+package() {
+	# parent package is empty
+	mkdir -p "$pkgdir"
+}
+
+adreno() {
+	pkgdesc="Nothing Phone (2) adreno firmware"
+
+	install -Dm644 "$builddir"/firmware/a660_zap.mbn -t \
+		"$subpkgdir/$resultdir/"
+	ln -s a660_zap.mbn "$subpkgdir/$resultdir/a660_zap.mdt"
+}
+
+adsp() {
+	pkgdesc="Nothing Phone (2) adsp firmware"
+
+	install -Dm644 "$builddir"/firmware/adsp.mbn -t \
+		"$subpkgdir/$resultdir/"
+	ln -s adsp.mbn "$subpkgdir/$resultdir/adsp.mdt"
+	install -Dm644 "$builddir"/firmware/adsp*.jsn -t \
+		"$subpkgdir/$resultdir/"
+}
+
+cdsp() {
+	pkgdesc="Nothing Phone (2) cdsp firmware"
+
+	install -Dm644 "$builddir"/firmware/cdsp.mbn -t \
+		"$subpkgdir/$resultdir/"
+	ln -s cdsp.mbn "$subpkgdir/$resultdir/cdsp.mdt"
+	install -Dm644 "$builddir"/firmware/cdsp*.jsn -t \
+		"$subpkgdir/$resultdir/"
+}
+
+slpi() {
+	pkgdesc="Nothing Phone (2) slpi firmware"
+
+	install -Dm644 "$builddir"/firmware/slpi.mbn -t \
+		"$subpkgdir/$resultdir/"
+	ln -s slpi.mbn "$subpkgdir/$resultdir/slpi.mdt"
+	install -Dm644 "$builddir"/firmware/slpi*.jsn -t \
+		"$subpkgdir/$resultdir/"
+}
+
+ipa() {
+	pkgdesc="Nothing Phone (2) ipa firmware"
+
+	install -Dm644 "$builddir"/firmware/ipa_fws.mbn \
+		"$subpkgdir/$resultdir/ipa_fws.mbn"
+	ln -s ipa_fws.mbn "$subpkgdir/$resultdir/ipa_fws.mdt"
+}
+
+modem() {
+	pkgdesc="Nothing Phone (2) modem firmware"
+
+	install -Dm644 "$builddir"/firmware/modem.mbn -t \
+		"$subpkgdir/$resultdir/"
+	ln -s modem.mbn "$subpkgdir/$resultdir/modem.mdt"
+	install -Dm644 "$builddir"/firmware/modem*.jsn -t \
+		"$subpkgdir/$resultdir/"
+
+	cp -r "$builddir"/firmware/modem_pr/ \
+		"$subpkgdir/$resultdir/"
+	find "$subpkgdir/$resultdir/" \
+		-type f -exec chmod 0644 {} \;
+}
+
+venus() {
+	pkgdesc="Nothing Phone (2) venus firmware"
+
+	install -Dm644 "$builddir"/firmware/venus.mbn \
+		"$subpkgdir/$resultdir/venus.mbn"
+}
+
+sha512sums="
+b952aeb6dc953a66514aea00a32cc766c2554e59c9dbbdab723dbf65d5e5e5deeefdc80e88ec59214fdf89d2ffdd6e632e42304ef510431fb4ecc0374f81ba06  FP5-firmware-798524050d9f4802450cd4f1bf46ddd105b6ae4f.tar.gz
+"

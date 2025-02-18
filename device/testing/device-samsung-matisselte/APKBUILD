@@ -1,0 +1,30 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-matisselte
+pkgdesc="Samsung Galaxy Tab 4 10.1 LTE"
+pkgver=3
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="
+	linux-postmarketos-qcom-msm8226
+	mkbootimg
+	postmarketos-base
+	soc-qcom-msm8226
+	"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+
+sha512sums="
+cea5a7be040ec6c9e2ec1d5799e1f37547ecf3db3225d527d460b3bd2e98e1298b8ceb435d0920242446c788f0461ede62772000795b91cc8d91981617324a56  deviceinfo
+"

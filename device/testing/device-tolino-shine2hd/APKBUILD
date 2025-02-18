@@ -1,0 +1,42 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-tolino-shine2hd
+pkgdesc="Tolino Shine 2 HD"
+pkgver=3
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="
+	kobo-epdc-extractor
+	linux-postmarketos-imx-ereader
+	perl
+	postmarketos-base
+	u-boot-tolino-shine2hd
+"
+makedepends="devicepkg-dev"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+
+source="
+	deviceinfo
+	modules-initfs
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="Wifi firmware"
+	depends="linux-firmware-brcm"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+f34e4efe2b36bf8dfc4aa8e5fcd34d3561e4fc39783429e030635617041cce26f1b8ac8ee36e6eb37579386faa02f964c2119549ed02ab09092b47b9a52e6669  deviceinfo
+5d53ee902538e53c4fe79eaef8e3800b9d3f73ec70d2a9887ddb11a6715ca76ce17128e3c02c2b6f2f575fb86f15c2415c24466d4b1a031f7a346d0db186dcb1  modules-initfs
+"

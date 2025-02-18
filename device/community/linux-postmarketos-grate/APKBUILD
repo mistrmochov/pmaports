@@ -1,0 +1,53 @@
+# Maintainer: Svyatoslav Ryhel <clamor95@gmail.com>
+# Co-Maintainer: Jenneron <jenneron@protonmail.com>
+# Co-Maintainer: Jethrob <jeybee@hotmail.com>
+
+pkgname=linux-postmarketos-grate
+pkgver=6.6.22
+pkgrel=7
+pkgdesc="Linux kernel with experimental patches for Tegra"
+arch="armv7"
+url="https://gitlab.com/grate-driver/linux"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps pmb:cross-native pmb:kconfigcheck-community pmb:kconfigcheck-uefi"
+makedepends="bash bison findutils flex postmarketos-installkernel openssl-dev
+	     perl gmp-dev mpc1-dev mpfr-dev xz"
+
+# Source
+_flavor="${pkgname#linux-}"
+_tag="v${pkgver//_/-}-lts"
+_carch="arm"
+_config="config-$_flavor.$arch"
+source="$pkgname-$_tag.tar.bz2::$url/-/archive/$_tag/linux-$_tag.tar.bz2
+	$_config"
+builddir="$srcdir/linux-$_tag"
+
+prepare() {
+	default_prepare
+	cp "$srcdir/config-$_flavor.$CARCH" .config
+}
+
+build() {
+	unset LDFLAGS
+	make ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS"
+}
+
+package() {
+	mkdir -p "$pkgdir"/boot
+	make zinstall modules_install dtbs_install \
+		ARCH="$_carch" \
+		INSTALL_PATH="$pkgdir"/boot \
+		INSTALL_MOD_PATH="$pkgdir" \
+		INSTALL_MOD_STRIP=1 \
+		INSTALL_DTBS_PATH="$pkgdir"/boot/dtbs
+	rm -f "$pkgdir"/lib/modules/*/build "$pkgdir"/lib/modules/*/source
+
+	install -D "$builddir"/include/config/kernel.release \
+		"$pkgdir"/usr/share/kernel/$_flavor/kernel.release
+}
+
+sha512sums="
+db25898c5c4103e12ace113de7f7eba91b41f94a4dae270c9424341e8f796a98dee8676d1d02b229b0c4b11cc79b31454a13f9f2b7b1277b5ca9bb7328d54a39  linux-postmarketos-grate-v6.6.22-lts.tar.bz2
+7355f5323655fec8da961252a42541e329c3c152937bee04e3a96b7b3a80713c58bccdcdcd044b6b8d45ad7105e9d6b9188f47e043fd9429621bb77b6964ccde  config-postmarketos-grate.armv7
+"

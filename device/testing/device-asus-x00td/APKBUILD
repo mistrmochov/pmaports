@@ -1,0 +1,48 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-asus-x00td
+pkgdesc="Asus ZenFone Max Pro M1"
+pkgver=3
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="postmarketos-base mkbootimg"
+makedepends="devicepkg-dev"
+subpackages="
+	$pkgname-kernel-downstream:kernel_downstream
+	$pkgname-kernel-mainline:kernel_mainline
+	$pkgname-nonfree-firmware:nonfree_firmware
+"
+source="deviceinfo modules-initfs"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+kernel_downstream() {
+	pkgdesc="LineageOS downstream kernel (recommended)"
+	depends="linux-asus-x00td msm-fb-refresher"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+kernel_mainline() {
+	pkgdesc="Close to mainline; for kernel development only (most features aren't working)"
+	depends="linux-postmarketos-qcom-sdm660 soc-qcom-sdm660 soc-qcom-sdm660-rproc"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="Wifi, Bluetooth, GPU, Modem, ADSP, Venus firmware"
+	depends="firmware-asus-x00td"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+57b6b370f79aa393809e491d1245b7212cbf4e8247f94808831afcb886ab5de41a9cd11efc68f8e87b2823d3bc78e188ab37da99067ad0df88a281f03a1a1794  deviceinfo
+7f4a740253be1eed207f6a35901fd6efa632fe90c4181eefd863b131230b63b5a729cf3805ca2029ea89b5b31e795e551fc001b617ceacaf6f497cf1da3c1bda  modules-initfs
+"

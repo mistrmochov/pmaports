@@ -1,0 +1,81 @@
+# Maintainer: Oliver Smith <ollieparanoid@postmarketos.org>
+pkgname=postmarketos-base-ui-gnome
+pkgver=4
+pkgrel=4
+pkgdesc="Meta package for shared configuration for GNOME-based UIs"
+url="https://postmarketos.org"
+arch="noarch"
+license="GPL-3.0-or-later"
+# polkit-elogind is needed so apk can resolve polkit:
+# https://gitlab.alpinelinux.org/alpine/apk-tools/-/issues/11054
+depends="
+	dnsmasq
+	gcr-ssh-agent
+	gnome-bluetooth
+	gnome-keyring
+	iio-sensor-proxy
+	modemmanager
+	postmarketos-artwork-wallpapers
+	postmarketos-base-ui
+	postmarketos-base-ui-networkmanager
+	polkit-elogind
+	power-profiles-provider
+	xdg-desktop-portal-gnome
+	xdg-desktop-portal-gtk
+	xdg-user-dirs
+	xdg-user-dirs-gtk
+	xwayland
+	"
+source="
+	00_postmarketos-base-ui-gnome.gschema.override
+	10_postmarketos-green-accent.gschema.override
+	"
+options="!check"
+subpackages="$pkgname-openrc"
+
+_pmb_recommends="
+	decibels
+	firefox-esr
+	flatpak
+	gnome-calculator
+	gnome-calendar
+	gnome-clocks
+	gnome-console
+	gnome-contacts
+	gnome-maps
+	gnome-software
+	gnome-software-plugin-apk
+	gnome-text-editor
+	gnome-weather
+	loupe
+	nautilus
+	papers
+	showtime
+	snapshot
+"
+
+package() {
+	install -Dm644 -t "$pkgdir"/usr/share/glib-2.0/schemas \
+		"$srcdir"/*.override
+}
+
+openrc() {
+	install_if="$pkgname=$pkgver-r$pkgrel openrc"
+	install="$subpkgname.post-install $subpkgname.post-upgrade"
+	depends="
+		apk-polkit-rs-openrc
+		elogind
+		elogind-openrc
+		iio-sensor-proxy-openrc
+		modemmanager-openrc
+		networkmanager-openrc
+		polkit-elogind
+	"
+
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+1f68138876f2270943c88fd6f914f156692397a840f4945564cce0ed6e5d56943661fee025e0e4e0881b5df18a4f5f290086eb67be945e59abd5fe4c71cf5e67  00_postmarketos-base-ui-gnome.gschema.override
+ac597d87ab0502a54481d4c0640cba7cd7fbf6380fe429ec85aefa77b796744a64c1b98fb91eb15e4e75b8781fa3c67809803d07bed085b1ff176c5aacbc5090  10_postmarketos-green-accent.gschema.override
+"

@@ -1,0 +1,75 @@
+# Maintainer: Andreas Kemnade <andreas@kemnade.info>
+# Kernel config based on: arch/arm/configs/kobo_defconfig
+
+pkgname=linux-postmarketos-imx-ereader
+pkgver=6.13.0
+pkgrel=1
+pkgdesc="i.MX E-Book reader kernel fork, close to mainline"
+replaces="linux-kobo-clara-mainline"
+provides="linux-kobo-clara-mainline=$pkgver-r$pkgrel"
+arch="armv7"
+_carch="arm"
+_flavor="postmarketos-imx-ereader"
+url="https://kernel.org"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps pmb:cross-native pmb:kconfigcheck-nftables"
+makedepends="
+	bash
+	bc
+	bison
+	devicepkg-dev
+	findutils
+	flex
+	gmp-dev
+	lzop
+	mpc1-dev
+	mpfr-dev
+	openssl-dev
+	perl
+"
+
+# Source
+_repository="linux"
+_commit="09bacc073f275377698322258cf9e2cd19aecc97"
+_rtl8189fs_repository="rtl8189ES_linux"
+_rtl8189fs_commit="94cc959d56c1425fbca4f6e49e949cf58ec5dc8d"
+_config="config-$_flavor.$arch"
+source="
+	$pkgname-$_commit.tar.gz::https://github.com/akemnade/$_repository/archive/$_commit.tar.gz
+	$_rtl8189fs_repository-$_rtl8189fs_commit.tar.gz::https://github.com/jwrdegoede/$_rtl8189fs_repository/archive/$_rtl8189fs_commit.tar.gz
+	$_config
+"
+builddir="$srcdir/$_repository-$_commit"
+_outdir="out"
+_rtl8189fs_dir="$srcdir/$_rtl8189fs_repository-$_rtl8189fs_commit"
+
+prepare() {
+	default_prepare
+	REPLACE_GCCH=0 . downstreamkernel_prepare
+}
+
+build() {
+	unset LDFLAGS
+	make O="$_outdir" ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$(( pkgrel + 1 ))-postmarketOS"
+	make O="$_outdir" ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$(( pkgrel + 1 ))-postmarketOS" \
+		CONFIG_RTW_SDIO_PM_KEEP_POWER=n \
+		CONFIG_RTW_DEBUG=n \
+		-C "$_rtl8189fs_dir" KSRC="$builddir"
+}
+
+package() {
+	downstreamkernel_package "$builddir" "$pkgdir" "$_carch" "$_flavor" "$_outdir"
+	make modules_install dtbs_install \
+		O="$_outdir" ARCH="$_carch" \
+		INSTALL_MOD_PATH="$pkgdir" \
+		INSTALL_DTBS_PATH="$pkgdir/boot/dtbs"
+	install -Dm644 "$_rtl8189fs_dir"/8189fs.ko -t "$pkgdir/lib/modules/$(make -s O="$_outdir" ARCH="$_carch" kernelrelease)/kernel/drivers/net/wireless"
+}
+
+sha512sums="
+9f69a012b094fda122f8a209b89ea1c0cf7feae85eaf21312c36e292c30c2eaabba9ec81a5bce3a30fde0d43d57aa7c1fd3a6d7b2d210dca2e4826ef706ce424  linux-postmarketos-imx-ereader-09bacc073f275377698322258cf9e2cd19aecc97.tar.gz
+43b9b4969cb7740893ecf3c6aeb0e63ad576808df143ed94f866b44431fd7f3f262d63905e372ad367129e7e9b6a3d4e468cfe33fb803e667304b11bf6328fe1  rtl8189ES_linux-94cc959d56c1425fbca4f6e49e949cf58ec5dc8d.tar.gz
+0bbdeb74bbee2893e94458604afefac69c7162e993cc21b7abb9c7952b1697ade631f248cf72927fed3557cd651e9379762c11fd48c8927d08c4e1159589e6c4  config-postmarketos-imx-ereader.armv7
+"

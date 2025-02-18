@@ -1,0 +1,65 @@
+# Maintainer: Newbyte <newbie13xd@gmail.com>
+# Kernel config based on: arch/arm/configs/qcom_defconfig
+
+_flavor="postmarketos-qcom-msm8226"
+pkgname=linux-$_flavor
+pkgver=6.11.11
+pkgrel=1
+_tag="v${pkgver/_/-}-msm8226"
+pkgdesc="Mainline kernel fork for Qualcomm APQ8026/MSM8226/MSM8926 devices"
+arch="armv7"
+_carch="arm"
+url="https://kernel.org"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps
+	pmb:cross-native
+"
+makedepends="
+	bison
+	findutils
+	flex
+	gmp-dev
+	mpc1-dev
+	mpfr-dev
+	openssl-dev
+	perl
+	postmarketos-installkernel
+	python3
+"
+
+# Source
+source="
+	linux-$_tag.tar.gz::https://github.com/msm8226-mainline/linux/archive/refs/tags/$_tag.tar.gz
+	config-$_flavor.armv7
+	"
+builddir="$srcdir/linux-${_tag#v}"
+
+prepare() {
+	default_prepare
+	cp "$srcdir/config-$_flavor.$CARCH" .config
+}
+
+build() {
+	unset LDFLAGS
+	make ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION=$((pkgrel + 1 ))
+}
+
+package() {
+	mkdir -p "$pkgdir"/boot
+	make zinstall modules_install dtbs_install \
+		ARCH="$_carch" \
+		INSTALL_PATH="$pkgdir"/boot \
+		INSTALL_MOD_PATH="$pkgdir" \
+		INSTALL_MOD_STRIP=1 \
+		INSTALL_DTBS_PATH="$pkgdir"/boot/dtbs
+	rm -f "$pkgdir"/lib/modules/*/build "$pkgdir"/lib/modules/*/source
+
+	install -D "$builddir"/include/config/kernel.release \
+		"$pkgdir"/usr/share/kernel/$_flavor/kernel.release
+}
+
+sha512sums="
+7cbd507895b9197ba39f83725d73fce43dfb56ce20a84d791cbe049cd4a867912f1854f5ebadfee20e69dd3e240fb4ba338dd65f9fb1c709018a75b69461ac92  linux-v6.11.11-msm8226.tar.gz
+452f4d80085deaf078a9974966aeaac764bbe368d58d148c7040e24ea686fdb21fefd82c7714d68db51c129d6f97a2a131f7a12e9e07f05ed784ae55f5f110e8  config-postmarketos-qcom-msm8226.armv7
+"
